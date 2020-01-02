@@ -22,7 +22,6 @@ var (
 	iteratorStep     = reflect.TypeOf((*linkedql.IteratorStep)(nil)).Elem()
 	entityIdentifier = reflect.TypeOf((*linkedql.EntityIdentifier)(nil)).Elem()
 	value            = reflect.TypeOf((*quad.Value)(nil)).Elem()
-	operator         = reflect.TypeOf((*linkedql.Operator)(nil)).Elem()
 	propertyPath     = reflect.TypeOf((*linkedql.PropertyPath)(nil)).Elem()
 	stringMap        = reflect.TypeOf(map[string]string{})
 	graphPattern     = reflect.TypeOf(linkedql.GraphPattern(nil))
@@ -50,9 +49,6 @@ func typeToRange(t reflect.Type) string {
 	}
 	if t.Implements(pathStep) {
 		return linkedql.Prefix + "PathStep"
-	}
-	if t.Implements(operator) {
-		return linkedql.Prefix + "Operator"
 	}
 	if t.Implements(value) {
 		return rdfs.Resource
