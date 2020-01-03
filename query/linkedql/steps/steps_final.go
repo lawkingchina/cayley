@@ -14,12 +14,29 @@ func init() {
 	linkedql.Register(&Documents{})
 }
 
+func newTagsIteratorFrom(from linkedql.PathStep, selected []string, qs graph.QuadStore, ns *voc.Namespaces) (*linkedql.TagsIterator, error) {
+	fromPath, err := linkedql.BuildFrom(from, qs, ns)
+	if err != nil {
+		return nil, err
+	}
+	valueIt := linkedql.NewValueIterator(fromPath, qs)
+	return &linkedql.TagsIterator{ValueIt: valueIt, Selected: selected}, nil
+}
+
+func singleValueIteratorFrom(from linkedql.PathStep, qs graph.QuadStore, ns *voc.Namespaces) (*linkedql.ValueIterator, error) {
+	fromPath, err := linkedql.BuildFrom(from, qs, ns)
+	if err != nil {
+		return nil, err
+	}
+	return linkedql.NewValueIterator(fromPath.Limit(1), qs), nil
+}
+
 var _ linkedql.IteratorStep = (*Select)(nil)
 
 // Select corresponds to .select().
 type Select struct {
+	From linkedql.PathStep `json:"from" minCardinality:"0"`
 	Tags []string          `json:"tags"`
-	From linkedql.PathStep `json:"from"`
 }
 
 // Description implements Step.
@@ -29,19 +46,15 @@ func (s *Select) Description() string {
 
 // BuildIterator implements IteratorStep
 func (s *Select) BuildIterator(qs graph.QuadStore, ns *voc.Namespaces) (query.Iterator, error) {
-	valueIt, err := linkedql.NewValueIteratorFromPathStep(s.From, qs, ns)
-	if err != nil {
-		return nil, err
-	}
-	return &linkedql.TagsIterator{ValueIt: valueIt, Selected: s.Tags}, nil
+	return newTagsIteratorFrom(s.From, s.Tags, qs, ns)
 }
 
 var _ linkedql.IteratorStep = (*SelectFirst)(nil)
 
 // SelectFirst corresponds to .selectFirst().
 type SelectFirst struct {
+	From linkedql.PathStep `json:"from" minCardinality:"0"`
 	Tags []string          `json:"tags"`
-	From linkedql.PathStep `json:"from"`
 }
 
 // Description implements Step.
@@ -49,28 +62,20 @@ func (s *SelectFirst) Description() string {
 	return "Like Select but only returns the first result"
 }
 
-func singleValueIteratorFromPathStep(step linkedql.PathStep, qs graph.QuadStore, ns *voc.Namespaces) (*linkedql.ValueIterator, error) {
-	p, err := step.BuildPath(qs, ns)
-	if err != nil {
-		return nil, err
-	}
-	return linkedql.NewValueIterator(p.Limit(1), qs), nil
-}
-
 // BuildIterator implements IteratorStep
 func (s *SelectFirst) BuildIterator(qs graph.QuadStore, ns *voc.Namespaces) (query.Iterator, error) {
-	it, err := singleValueIteratorFromPathStep(s.From, qs, ns)
+	it, err := singleValueIteratorFrom(s.From, qs, ns)
 	if err != nil {
 		return nil, err
 	}
-	return &linkedql.TagsIterator{it, s.Tags}, nil
+	return &linkedql.TagsIterator{ValueIt: it, Selected: s.Tags}, nil
 }
 
 var _ linkedql.IteratorStep = (*Value)(nil)
 
 // Value corresponds to .value().
 type Value struct {
-	From linkedql.PathStep `json:"from"`
+	From linkedql.PathStep `json:"from" minCardinality:"0"`
 }
 
 // Description implements Step.
@@ -80,14 +85,14 @@ func (s *Value) Description() string {
 
 // BuildIterator implements IteratorStep
 func (s *Value) BuildIterator(qs graph.QuadStore, ns *voc.Namespaces) (query.Iterator, error) {
-	return singleValueIteratorFromPathStep(s.From, qs, ns)
+	return singleValueIteratorFrom(s.From, qs, ns)
 }
 
 var _ linkedql.IteratorStep = (*Documents)(nil)
 
 // Documents corresponds to .documents().
 type Documents struct {
-	From linkedql.PathStep `json:"from"`
+	From linkedql.PathStep `json:"from" minCardinality:"0"`
 }
 
 // Description implements Step.
@@ -97,13 +102,9 @@ func (s *Documents) Description() string {
 
 // BuildIterator implements IteratorStep
 func (s *Documents) BuildIterator(qs graph.QuadStore, ns *voc.Namespaces) (query.Iterator, error) {
-	p, err := s.From.BuildPath(qs, ns)
+	tagsIt, err := newTagsIteratorFrom(s.From, nil, qs, ns)
 	if err != nil {
 		return nil, err
 	}
-	it, err := linkedql.NewValueIterator(p, qs), nil
-	if err != nil {
-		return nil, err
-	}
-	return linkedql.NewDocumentIterator(it), nil
+	return linkedql.NewDocumentIterator(tagsIt), nil
 }

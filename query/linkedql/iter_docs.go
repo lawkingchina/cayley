@@ -22,8 +22,7 @@ type DocumentIterator struct {
 }
 
 // NewDocumentIterator returns a new DocumentIterator for a QuadStore and Path.
-func NewDocumentIterator(valueIt *ValueIterator) *DocumentIterator {
-	tagsIt := &TagsIterator{ValueIt: valueIt, Selected: nil}
+func NewDocumentIterator(tagsIt *TagsIterator) *DocumentIterator {
 	return &DocumentIterator{tagsIt: tagsIt, current: -1}
 }
 
