@@ -33,7 +33,7 @@ func (s *Follow) BuildIterator(qs graph.QuadStore, ns *voc.Namespaces) (query.It
 
 // BuildPath implements linkedql.PathStep.
 func (s *Follow) BuildPath(qs graph.QuadStore, ns *voc.Namespaces) (*path.Path, error) {
-	fromPath, err := s.From.BuildPath(qs, ns)
+	fromPath, err := linkedql.BuildFrom(s.From, qs, ns)
 	if err != nil {
 		return nil, err
 	}
