@@ -14,7 +14,7 @@ var _ linkedql.PathStep = (*Like)(nil)
 
 // Like corresponds to like().
 type Like struct {
-	From    linkedql.PathStep `json:"from"`
+	From    linkedql.PathStep `json:"from" minCardinality:"0"`
 	Pattern string            `json:"pattern"`
 }
 

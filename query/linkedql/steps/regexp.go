@@ -15,7 +15,7 @@ var _ linkedql.PathStep = (*RegExp)(nil)
 
 // RegExp corresponds to regex().
 type RegExp struct {
-	From        linkedql.PathStep `json:"from"`
+	From        linkedql.PathStep `json:"from" minCardinality:"0"`
 	Pattern     string            `json:"pattern"`
 	IncludeIRIs bool              `json:"includeIRIs,omitempty"`
 }
