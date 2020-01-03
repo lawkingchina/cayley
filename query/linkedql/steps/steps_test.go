@@ -32,7 +32,7 @@ var testCases = []struct {
 	{
 		name:  "All Vertices",
 		data:  singleQuadData,
-		query: &Vertex{Values: nil},
+		query: &Vertex{},
 		results: []interface{}{
 			map[string]string{"@id": "alice"},
 			map[string]string{"@id": "likes"},
@@ -46,7 +46,6 @@ var testCases = []struct {
 			From: &As{
 				From: &Visit{
 					From: &As{
-						From: &Vertex{},
 						Name: "liker",
 					},
 					Properties: linkedql.PropertyPath{&Vertex{Values: []quad.Value{quad.IRI("likes")}}},
@@ -69,7 +68,6 @@ var testCases = []struct {
 			From: &As{
 				From: &Visit{
 					From: &As{
-						From: &Vertex{},
 						Name: "liker",
 					},
 					Properties: linkedql.PropertyPath{&Vertex{Values: []quad.Value{quad.IRI("likes")}}},
@@ -443,7 +441,6 @@ var testCases = []struct {
 				From: &Visit{
 					From: &As{
 						Name: "liker",
-						From: &Vertex{},
 					},
 					Properties: linkedql.PropertyPath{&Vertex{Values: []quad.Value{quad.IRI("likes")}}},
 				},
@@ -466,11 +463,9 @@ var testCases = []struct {
 		},
 	},
 	{
-		name: "Order",
-		data: singleQuadData,
-		query: &Order{
-			From: &Vertex{},
-		},
+		name:  "Order",
+		data:  singleQuadData,
+		query: &Order{},
 		results: []interface{}{
 			map[string]string{"@id": "alice"},
 			map[string]string{"@id": "bob"},
@@ -516,7 +511,6 @@ var testCases = []struct {
 		query: &Select{
 			From: &As{
 				From: &Where{
-					From: &Vertex{},
 					Steps: []linkedql.PathStep{
 						&As{
 							From: &Visit{
@@ -583,7 +577,6 @@ var testCases = []struct {
 		},
 		query: &Context{
 			From: &Has{
-				From:     &Vertex{},
 				Property: linkedql.PropertyPath{linkedql.PropertyIRI("likes")},
 				Values:   []quad.Value{quad.IRI("bob")},
 			},
@@ -603,7 +596,6 @@ var testCases = []struct {
 			quad.MakeIRI("http://example.org/bob", "http://example.org/likes", "http://example.org/alice", ""),
 		},
 		query: &Match{
-			From:    &Vertex{},
 			Pattern: linkedql.GraphPattern{"@id": "http://example.org/alice"},
 		},
 		results: []interface{}{
@@ -617,7 +609,6 @@ var testCases = []struct {
 			quad.MakeIRI("http://example.org/bob", "http://example.org/likes", "http://example.org/alice", ""),
 		},
 		query: &Match{
-			From:    &Vertex{},
 			Pattern: linkedql.GraphPattern{"http://example.org/likes": map[string]interface{}{"@id": "http://example.org/alice"}},
 		},
 		results: []interface{}{
