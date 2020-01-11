@@ -13,27 +13,28 @@ var _ query.Iterator = (*TagsIterator)(nil)
 // TagsIterator is a result iterator for records consisting of selected tags
 // or all the tags in the query.
 type TagsIterator struct {
-	ValueIt  *ValueIterator
-	Selected []string
+	valueIt  *ValueIterator
+	selected []string
 }
 
 // Next implements query.Iterator.
 func (it *TagsIterator) Next(ctx context.Context) bool {
-	return it.ValueIt.Next(ctx)
+	return it.valueIt.Next(ctx)
 }
 
 func (it *TagsIterator) getTags() map[string]interface{} {
 	refTags := make(map[string]refs.Ref)
-	it.ValueIt.scanner.TagResults(refTags)
+	it.valueIt.scanner.TagResults(refTags)
 
 	tags := make(map[string]interface{})
-	if it.Selected != nil {
-		for _, tag := range it.Selected {
-			tags[tag] = jsonld.FromValue(it.ValueIt.getName(refTags[tag]))
+	// FIXME(iddan): only convert when collation is JSON/JSON-LD, leave as Ref otherwise
+	if it.selected != nil {
+		for _, tag := range it.selected {
+			tags[tag] = jsonld.FromValue(it.valueIt.getName(refTags[tag]))
 		}
 	} else {
 		for tag, ref := range refTags {
-			tags[tag] = jsonld.FromValue(it.ValueIt.getName(ref))
+			tags[tag] = jsonld.FromValue(it.valueIt.getName(ref))
 		}
 	}
 
@@ -47,10 +48,10 @@ func (it *TagsIterator) Result() interface{} {
 
 // Err implements query.Iterator.
 func (it *TagsIterator) Err() error {
-	return it.ValueIt.Err()
+	return it.valueIt.Err()
 }
 
 // Close implements query.Iterator.
 func (it *TagsIterator) Close() error {
-	return it.ValueIt.Close()
+	return it.valueIt.Close()
 }

@@ -23,7 +23,7 @@ type DocumentIterator struct {
 
 // NewDocumentIterator returns a new DocumentIterator for a QuadStore and Path.
 func NewDocumentIterator(valueIt *ValueIterator) *DocumentIterator {
-	tagsIt := &TagsIterator{ValueIt: valueIt, Selected: nil}
+	tagsIt := &TagsIterator{valueIt: valueIt, selected: nil}
 	return &DocumentIterator{tagsIt: tagsIt, current: -1}
 }
 
@@ -32,7 +32,7 @@ func (it *DocumentIterator) Next(ctx context.Context) bool {
 	if it.properties == nil {
 		it.properties = make(idToProperties)
 		for it.tagsIt.Next(ctx) {
-			id := it.tagsIt.ValueIt.Value()
+			id := it.tagsIt.valueIt.Value()
 			tags := it.tagsIt.getTags()
 			it.ids = append(it.ids, id)
 			for k, v := range tags {
@@ -58,6 +58,7 @@ func (it *DocumentIterator) Result() interface{} {
 		return nil
 	}
 	id := it.ids[it.current]
+	// FIXME(iddan): don't cast to string when collation is Raw
 	var sid string
 	switch val := id.(type) {
 	case quad.IRI:
